@@ -27,6 +27,7 @@
         ,upsert_doc/4
         ,upsert_doc/5
         ,upsert_doc_opts/6
+	, upsert_script_opts/6
         ,bulk_index_docs/2
         ,search/2
         ,search/3
@@ -200,6 +201,18 @@ upsert_doc_opts(Params, Index, Type, Id, Doc, Opts) when is_list(Opts), (is_list
     erls_resource:post(Params, filename:join([Index, Type, Id, "_update"]), [], Opts,
                        Body,
                        Params#erls_params.http_client_options).
+
+
+-spec upsert_script_opts(#erls_params{}, binary(), binary(), binary(), erlastic_json(), list()) -> {ok, erlastic_success_result()} | {error, any()}.
+upsert_script_opts(Params, Index, Type, Id, Doc, Opts) when is_list(Opts), (is_list(Doc) orelse is_tuple(Doc) orelse is_map(Doc)) ->
+    %% Doc is an script update as https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
+    DocBin = erls_json:encode(Doc),
+        %% we cannot use erls_json to generate this, see the doc string for `erls_json:encode/1'                                                                                                                                                                                  
+    Body = DocBin,
+        erls_resource:post(Params, filename:join([Index, Type, Id, "_update"]), [], Opts,
+                       Body,
+                       Params#erls_params.http_client_options).
+
 
 %% Documents is [ {Index, Type, Id, Json}, {Index, Type, Id, HeaderInformation, Json}... ]
 -spec bulk_index_docs(#erls_params{}, list()) -> {ok, list()} | {error, any()}.
