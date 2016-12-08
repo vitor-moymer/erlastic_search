@@ -102,7 +102,7 @@ default_header(K, V, H) ->
     end.
 
 add_authentication(Header) ->
-    [{<<"Authorization">>,base64:encode_to_string(<<"awesome:blicup@moymer">>)} | Header].
+    [{<<"Authorization">>,iolist_to_binary([<<"Basic ">>,base64:encode_to_string(<<"awesome:blicup@moymer">>)]) } | Header].
 
 default_content_length(B, H) ->
     default_header(<<"Content-Length">>, list_to_binary(integer_to_list(erlang:iolist_size(B))), H).
