@@ -93,11 +93,16 @@ encode_query(Props) ->
     P = fun({A,B}, AccIn) -> io_lib:format("~s=~s&", [A,B]) ++ AccIn end,
     iolist_to_binary((lists:foldr(P, [], Props))).
 
+
+
 default_header(K, V, H) ->
     case proplists:is_defined(K, H) of
-        true -> H;
-        false -> [{K, V}|H]
+        true -> add_authentication(H);
+        false -> add_authentication([{K, V}|H])
     end.
+
+add_authentication(Header) ->
+    [{<<"Authorization">>,base64:encode_to_string(<<"awesome:blicup@moymer">>)} | Header].
 
 default_content_length(B, H) ->
     default_header(<<"Content-Length">>, list_to_binary(integer_to_list(erlang:iolist_size(B))), H).
