@@ -18,7 +18,20 @@
         ,post/6
         ,put/6]).
 
+-export([start_pool/0, 
+	 stop_pool/0]).
+
 -include("erlastic_search.hrl").
+
+start_pool() ->
+    PoolName = es_pool,
+    Options = [{timeout,180000 }, {max_connections, 50000}],
+    hackney_pool:start_pool(PoolName, Options).
+
+stop_pool() ->
+    PoolName = es_pool,
+    hackney_pool:stop_pool(PoolName).
+    
 
 get(State, Path, Headers, Params, Opts) ->
     request(State, get, Path, Headers, Params, [], Opts).
@@ -54,7 +67,7 @@ do_request(#erls_params{host=Host, port=Port, timeout=Timeout, ctimeout=CTimeout
            Method, Path, Headers, Body, Options) ->
     % Ugly, but to keep backwards compatibility: add recv_timeout and
     % connect_timeout when *not* present in Options.
-    NewOptions = lists:foldl(
+    OptionsAux = lists:foldl(
         fun({BCOpt, Value}, Acc) ->
             case proplists:get_value(BCOpt, Acc) of
                 undefined -> [{BCOpt, Value}|Acc];
@@ -64,6 +77,9 @@ do_request(#erls_params{host=Host, port=Port, timeout=Timeout, ctimeout=CTimeout
         Options,
         [{recv_timeout, Timeout}, {connect_timeout, CTimeout}]
     ),
+
+    NewOptions =  [{pool, es_pool} | OptionsAux],
+
     case hackney:request(Method, <<Host/binary, ":", (list_to_binary(integer_to_list(Port)))/binary,
                                    "/", Path/binary>>, Headers, Body,
                          NewOptions) of
