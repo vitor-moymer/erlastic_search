@@ -119,7 +119,10 @@ default_header(K, V, H) ->
 
 add_authentication(Header) ->
     case application:get_env(erlastic_search, passwd) of
-    [{<<"Authorization">>,iolist_to_binary([<<"Basic ">>,base64:encode_to_string(<<"awesome:blicup@moymer">>)]) } | Header].
+	undefined -> Header;
+	Passwd -> 
+	    [{<<"Authorization">>,iolist_to_binary([<<"Basic ">>,base64:encode_to_string(Passwd)]) } | Header]
+    end.
 
 default_content_length(B, H) ->
     default_header(<<"Content-Length">>, list_to_binary(integer_to_list(erlang:iolist_size(B))), H).

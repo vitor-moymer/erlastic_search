@@ -120,7 +120,7 @@ default_header(K, V, H) ->
 add_authentication(Header) ->
     case application:get_env(erlastic_search, passwd) of
 	undefined -> Header;
-	Passwd -> 
+	{ok, Passwd} -> 
 	    [{<<"Authorization">>,iolist_to_binary([<<"Basic ">>,base64:encode_to_string(Passwd)]) } | Header]
     end.
 
