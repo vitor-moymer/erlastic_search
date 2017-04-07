@@ -50,6 +50,7 @@
         ,delete_doc/4
         ,delete_doc_by_query/3
         ,delete_doc_by_query/4
+	,new_delete_doc_by_query/4
         ,delete_doc_by_query_doc/3
         ,delete_doc_by_query_doc/4
         ,delete_index/1
@@ -338,6 +339,11 @@ delete_doc_by_query_doc(Params, Index, any, Doc) ->
 
 delete_doc_by_query_doc(Params, Index, Type, Doc) ->
     erls_resource:delete(Params, filename:join([Index, Type, <<"_query">>]), [], [], erls_json:encode(Doc), Params#erls_params.http_client_options).
+
+new_delete_doc_by_query(Params, Index, Type, Query) ->
+    Opts = [],
+    erls_resource:post(Params, filename:join([commas(Index), Type, <<"_delete_by_query">>]), [], Opts, erls_json:encode(Query), Params#erls_params.http_client_options).
+
 
 %%--------------------------------------------------------------------
 %% @doc

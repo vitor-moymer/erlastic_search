@@ -27,6 +27,7 @@
         ,upsert_doc/4
         ,upsert_doc/5
         ,upsert_doc_opts/6
+	, upsert_script_opts/6
         ,bulk_index_docs/2
         ,search/2
         ,search/3
@@ -337,6 +338,11 @@ delete_doc_by_query_doc(Params, Index, any, Doc) ->
 
 delete_doc_by_query_doc(Params, Index, Type, Doc) ->
     erls_resource:delete(Params, filename:join([Index, Type, <<"_query">>]), [], [], erls_json:encode(Doc), Params#erls_params.http_client_options).
+
+new_delete_doc_by_query(Params, Index, Type, Query) ->
+    Opts = [],
+    erls_resource:post(Params, filename:join([commas(Index), Type, <<"_delete_by_query">>]), [], Opts, erls_json:encode(Query), Params#erls_params.http_client_options).
+
 
 %%--------------------------------------------------------------------
 %% @doc
