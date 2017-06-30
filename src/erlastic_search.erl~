@@ -29,6 +29,7 @@
         ,upsert_doc_opts/6
 	, upsert_script_opts/6
         ,bulk_index_docs/2
+	,bulk_docs/3
         ,search/2
         ,search/3
         ,search/5
@@ -50,6 +51,7 @@
         ,delete_doc/4
         ,delete_doc_by_query/3
         ,delete_doc_by_query/4
+	,new_delete_doc_by_query/4
         ,delete_doc_by_query_doc/3
         ,delete_doc_by_query_doc/4
         ,delete_index/1
@@ -218,13 +220,24 @@ upsert_script_opts(Params, Index, Type, Id, Doc, Opts) when is_list(Opts), (is_l
 -spec bulk_index_docs(#erls_params{}, list()) -> {ok, list()} | {error, any()}.
 bulk_index_docs(Params, IndexTypeIdJsonTuples) ->
      Body = lists:map(fun
-          Build({Index, Type, Id, Doc}) ->
-               Build({Index, Type, Id, [], Doc});
-          Build({Index, Type, Id, HeaderInformation, Doc}) ->
-               Header = bulk_index_docs_header(Index, Type, Id, HeaderInformation),
-               [ Header, <<"\n">>, maybe_encode_doc(Doc), <<"\n">> ]
-     end, IndexTypeIdJsonTuples),
-     erls_resource:post(Params, <<"/_bulk">>, [], [], iolist_to_binary(Body), Params#erls_params.http_client_options).
+			  Build({Index, Type, Id, Doc}) ->
+			      Build({Index, Type, Id, [], Doc});
+			  Build({Index, Type, Id, HeaderInformation, Doc}) ->
+			      Header = bulk_index_docs_header(Index, Type, Id, HeaderInformation),
+			      [ Header, <<"\n">>, maybe_encode_doc(Doc), <<"\n">> ]
+		      end, IndexTypeIdJsonTuples),
+    erls_resource:post(Params, <<"/_bulk">>, [], [], iolist_to_binary(Body), Params#erls_params.http_client_options).
+
+-spec bulk_docs(#erls_params{}, list()) -> {ok, list()} | {error, any()}.
+bulk_docs(Params, IndexTypeIdJsonTuples, Operation) ->
+    Body = lists:map(fun
+			 Build({Index, Type, Id, Doc}) ->
+			     Build({Index, Type, Id, [], Doc});
+			 Build({Index, Type, Id, HeaderInformation, Doc}) ->
+			     Header = bulk_docs_header(Operation,Index, Type, Id, HeaderInformation),
+			     [ Header, <<"\n">>, maybe_encode_doc(Doc), <<"\n">> ]
+		     end, IndexTypeIdJsonTuples),
+    erls_resource:post(Params, <<"/_bulk">>, [], [], iolist_to_binary(Body), Params#erls_params.http_client_options).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -392,19 +405,25 @@ commas([H | T]) ->
 
 -spec bulk_index_docs_header(binary(), binary(), binary(), list()) -> binary().
 bulk_index_docs_header(Index, Type, Id, HeaderInformation) ->
+    bulk_docs_header(<<"index">>, Index, Type, Id, HeaderInformation).
+
+
+-spec bulk_docs_header(binary(),binary(), binary(), binary(), list()) -> binary().
+bulk_docs_header(Operation, Index, Type, Id, HeaderInformation) ->
     IndexHeaderJson1 = [
         {<<"_index">>, Index}
         ,{<<"_type">>, Type}
         | HeaderInformation
-    ],
-
+		       ],
+    
     IndexHeaderJson2 = case Id =:= undefined of
-        true ->  IndexHeaderJson1;
-        false -> [ {<<"_id">>, Id} | IndexHeaderJson1]
+        true ->
+			       IndexHeaderJson1;
+			           false -> [ {<<"_id">>, Id} | IndexHeaderJson1]
     end,
 
-    %% we cannot use erls_json to generate this, see the doc string for `erls_json:encode/1'
-    jsx:encode([{<<"index">>, IndexHeaderJson2}]).
+    %% we cannot use erls_json to generate this, see the doc string for `erls_json:encode/1'                                                                                                                                                                                  
+    jsx:encode([{Operation, IndexHeaderJson2}]).
 
 -spec maybe_encode_doc(binary() | erlastic_json()) -> binary().
 maybe_encode_doc(Bin) when is_binary(Bin) -> Bin;
