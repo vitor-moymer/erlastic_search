@@ -417,6 +417,11 @@ percolate(Params, Index, Type, Doc) ->
     erls_resource:get(Params, filename:join([commas(Index), Type, <<"_percolate">>]), [], [], erls_json:encode(Doc), Params#erls_params.http_client_options).
 
 %%% Internal functions
+-spec search_helper(binary(), #erls_params{}, list() | binary(), list() | binary(), erlastic_json() | binary(), list()) -> {ok, erlastic_success_result()} | {error, any()}.
+search_helper(Endpoint, Params, Index, Type, Query, Opts) when is_binary(Query) ->
+    erls_resource:get(Params, filename:join([commas(Index), Type, Endpoint]), [], [{<<"q">>, Query}]++Opts, Params#erls_params.http_client_options);
+search_helper(Endpoint, Params, Index, Type, Query, Opts) ->
+    erls_resource:post(Params, filename:join([commas(Index), Type, Endpoint]), [], Opts, erls_json:encode(Query), Params#erls_params.http_client_options).
 
 -spec commas(list(binary()) | binary()) -> binary().
 commas(Bin) when is_binary(Bin) ->
