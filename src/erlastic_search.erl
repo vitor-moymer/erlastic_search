@@ -24,7 +24,10 @@
         ,index_doc_with_id/4
         ,index_doc_with_id/5
         ,index_doc_with_id_opts/6
-        ,upsert_doc/4
+	,count/2
+	,count/3
+        ,count/5
+	,upsert_doc/4
         ,upsert_doc/5
         ,upsert_doc_opts/6
 	, upsert_script_opts/6
@@ -181,6 +184,26 @@ index_doc_with_id_opts(Params, Index, Type, undefined, Doc, Opts) ->
 index_doc_with_id_opts(Params, Index, Type, Id, Doc, Opts) when is_list(Opts) ->
     erls_resource:post(Params, filename:join([Index, Type, Id]), [], Opts, maybe_encode_doc(Doc), Params#erls_params.http_client_options).
 
+%%--------------------------------------------------------------------
+%% @doc
+%% Uses the count API to execute a query and get the number of matches
+%% for that query. See `search/*' for more details regarding to
+%% query types and the different input parameters.
+%% @end
+%%--------------------------------------------------------------------
+-spec count(binary() | list(), erlastic_json() | binary()) -> {ok, erlastic_success_result()} | {error, any()}.
+count(Index, Query) ->
+    count(#erls_params{}, Index, <<>>, Query, []).
+
+-spec count(binary() | list() | #erls_params{}, binary() | list(), erlastic_json() | binary()) -> {ok, erlastic_success_result()} | {error, any()}.
+count(Params, Index, Query) when is_record(Params, erls_params) ->
+    count(Params, Index, <<>>, Query, []);
+count(Index, Type, Query) ->
+    count(#erls_params{}, Index, Type, Query, []).
+
+-spec count(#erls_params{}, list() | binary(), list() | binary(), erlastic_json() | binary(), list()) -> {ok, erlastic_success_result()} | {error, any()}.
+count(Params, Index, Type, Query, Opts) ->
+    search_helper(<<"_count">>, Params, Index, Type, Query, Opts).
 
 %%--------------------------------------------------------------------
 %% @doc Insert the document, or replacing it when it already exists (upsert)
