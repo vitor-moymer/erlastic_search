@@ -61,7 +61,6 @@ request(State, Method, Path, Headers, Params, Body, Options) ->
                   Props -> <<"?", (encode_query(Props))/binary>>
               end)/binary>>,
     {Headers2, Options1, Body} = make_body(Body, Headers, Options),
-    io:format("Header ~p ~n",[Headers2]),
     Headers3 = default_header(<<"Content-Type">>, <<"application/json">>, Headers2),
     do_request(State, Method, Path1, Headers3, Body, Options1).
 
