@@ -185,10 +185,10 @@ upsert_script(Inline, Params, UpsertDoc) ->
 
 
 upsert_stored_script(ScriptId, Params, undefined) ->    
-    [{<<"script">>,[{<<"lang">> , <<"groovy">>},{<<"stored">>,ScriptId},{<<"params">>,Params}]}];
+    [{<<"script">>,[{<<"stored">>,ScriptId},{<<"params">>,Params}]}];
 
 upsert_stored_script(ScriptId, Params, UpsertDoc) ->
-    [{<<"script">>,[{<<"lang">> , <<"groovy">>},{<<"stored">>,ScriptId},{<<"params">>,Params}]},
+    [{<<"script">>,[{<<"stored">>,ScriptId},{<<"params">>,Params}]},
      {<<"upsert">>,UpsertDoc} ].
 
 upsert_stored_script(ScriptId, Params,Lang, undefined) ->    
