@@ -23,6 +23,7 @@
 	 get_source_and_version/1,
 	 upsert_script/3,
 	 upsert_stored_script/3,
+	  upsert_stored_script/4,
 	 bucket_aggregation_result/2,
 	 scroll_parameter/0,
 	 scroll_parameter/1,
@@ -188,6 +189,13 @@ upsert_stored_script(ScriptId, Params, undefined) ->
 
 upsert_stored_script(ScriptId, Params, UpsertDoc) ->
     [{<<"script">>,[{<<"lang">> , <<"groovy">>},{<<"stored">>,ScriptId},{<<"params">>,Params}]},
+     {<<"upsert">>,UpsertDoc} ].
+
+upsert_stored_script(ScriptId, Params,Lang, undefined) ->    
+    [{<<"script">>,[{<<"lang">> , Lang},{<<"stored">>,ScriptId},{<<"params">>,Params}]}];
+
+upsert_stored_script(ScriptId, Params,Lang, UpsertDoc) ->
+    [{<<"script">>,[{<<"lang">> ,Lang},{<<"stored">>,ScriptId},{<<"params">>,Params}]},
      {<<"upsert">>,UpsertDoc} ].
 
 
