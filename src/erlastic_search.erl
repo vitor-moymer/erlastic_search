@@ -31,6 +31,7 @@
         ,upsert_doc/5
         ,upsert_doc_opts/6
 	, upsert_script_opts/6
+	,update_by_query/5
         ,bulk_index_docs/2
 	,bulk_docs/3
         ,search/2
@@ -235,6 +236,16 @@ upsert_script_opts(Params, Index, Type, Id, Doc, Opts) when is_list(Opts), (is_l
         %% we cannot use erls_json to generate this, see the doc string for `erls_json:encode/1'                                                                                                                                                                                  
     Body = DocBin,
         erls_resource:post(Params, filename:join([Index, Type, Id, "_update"]), [], Opts,
+                       Body,
+                       Params#erls_params.http_client_options).
+
+
+update_by_query(Params, Index, Type,  Doc, Opts) when is_list(Opts), (is_list(Doc) orelse is_tuple(Doc) orelse is_map(Doc)) ->
+    %% Doc is an script update as https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
+    DocBin = erls_json:encode(Doc),
+        %% we cannot use erls_json to generate this, see the doc string for `erls_json:encode/1'                                                                                                                                                                                  
+    Body = DocBin,
+        erls_resource:post(Params, filename:join([Index, Type, "_update_by_query"]), [], Opts,
                        Body,
                        Params#erls_params.http_client_options).
 
