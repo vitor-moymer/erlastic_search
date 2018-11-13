@@ -25,7 +25,7 @@
 
 start_pool() ->
     PoolName = es_pool,
-    Options = [{timeout,180000 }, {max_connections, 50000}],
+    Options = [{timeout,10000 }, {max_connections, 5000}],
     hackney_pool:start_pool(PoolName, Options).
 
 stop_pool() ->
