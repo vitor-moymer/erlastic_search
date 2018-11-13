@@ -13,6 +13,6 @@
           http_client_options = []:: [term()], 
 
           % Keeping the following two options for backwards compatibility.
-          timeout     = infinity :: integer() | infinity,
-          ctimeout    = infinity :: integer() | infinity
+          timeout     = 15000 :: integer() | infinity,
+          ctimeout    = 5000 :: integer() | infinity
          }).
