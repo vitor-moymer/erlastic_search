@@ -164,6 +164,7 @@ index_doc(Params, Index, Type, Doc) ->
 index_doc_with_opts(Params, Index, Type, Doc, Opts) when is_list(Opts) ->
     erls_resource:post(Params, filename:join(Index, Type), [], Opts, maybe_encode_doc(Doc), Params#erls_params.http_client_options).
 
+
 %%--------------------------------------------------------------------
 %% @doc
 %% Takes the index and type name and a Json document described in
@@ -182,9 +183,10 @@ index_doc_with_id(Params, Index, Type, Id, Doc) ->
 -spec index_doc_with_id_opts(#erls_params{}, binary(), binary(), binary(), erlastic_json() | binary(), list()) -> {ok, erlastic_success_result()} | {error, any()}.
 index_doc_with_id_opts(Params, Index, Type, undefined, Doc, Opts) ->
     index_doc_with_opts(Params, Index, Type, Doc, Opts);
+index_doc_with_id_opts(Params, Index, undefined, Id, Doc, Opts) when is_list(Opts) ->
+    erls_resource:post(Params, filename:join([Index, Id]), [], Opts, maybe_encode_doc(Doc), Params#erls_params.http_client_options);
 index_doc_with_id_opts(Params, Index, Type, Id, Doc, Opts) when is_list(Opts) ->
     erls_resource:post(Params, filename:join([Index, Type, Id]), [], Opts, maybe_encode_doc(Doc), Params#erls_params.http_client_options).
-
 %%--------------------------------------------------------------------
 %% @doc
 %% Uses the count API to execute a query and get the number of matches
