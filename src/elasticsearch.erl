@@ -15,6 +15,7 @@
 -export([
 	search_result_total/1,
 	 search_result_source/1,
+	 search_result_source_with_score/1,
 	 first_from_result/1,
 	 search_result_source_with_total/1,
 	 search_unique_result_inner_nested_list/2,
@@ -67,6 +68,22 @@ search_result_source(Result) ->
 	    []
     end.
 
+search_result_source_with_score(Result) ->
+    case Result of 
+	{ok,ResultList} ->
+	    {<<"hits">>,HitList} = lists:keyfind(<<"hits">>, 1, ResultList),
+	    case lists:keyfind(<<"total">>, 1, HitList) of
+		{<<"total">>,0} -> [] ;
+		_ -> {<<"hits">>,FoundList} = lists:keyfind(<<"hits">>, 1, HitList),
+		     [ aux_get_source_with_score(Found) || Found <- FoundList]
+	    end;
+	{error,Error} ->
+	    io:format("Search Error: ~p~n",[Error]),
+	    []
+    end.
+
+
+
 first_from_result(Result) ->
     R = search_result_source(Result),
     first(R).
@@ -115,6 +132,11 @@ search_result_source_with_total(Result) ->
 aux_get_source(SourceList) ->
     {<<"_source">>, Source} =  lists:keyfind(<<"_source">>, 1, SourceList),
     Source.
+
+aux_get_source_with_score(SourceList) ->
+    {<<"_source">>, Source} =  lists:keyfind(<<"_source">>, 1, SourceList),
+     {<<"_score">>, Score} =  lists:keyfind(<<"_score">>, 1, SourceList),
+     lists:keystore(<<"score">>, 1, Source, {<<"score">>, Score}).
 
 scroll_id(Result) ->
     case Result of
